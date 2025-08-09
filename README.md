@@ -1,135 +1,97 @@
-# SSN-college-software-architecture-Assignments-
-Assignment repository for building custom Python ETL data connectors (Kyureeus EdTech, SSN CSE). Students: Submit your ETL scripts here. Make sure your commit message includes your name and roll number.
-# Software Architecture Assignment: Custom Python ETL Data Connector
+Weather Data ETL Connector
 
-Welcome to the official repository for submitting your Software Architecture assignment on building custom data connectors (ETL pipelines) in Python. This assignment is part of the Kyureeus EdTech program for SSN CSE students.
+Project Overview
 
----
-Guideline: Building and Managing Custom Data Connectors (ETL Pipeline) in Python
+This project implements a Python-based ETL (Extract, Transform, Load) connector that retrieves current weather data for a specified city from the OpenWeatherMap API. The connector extracts JSON data from the API, transforms it into a structured format compatible with MongoDB, and loads it into a MongoDB collection for storage and further analysis.
 
-1. Setting Up the Connector Environment
-a. Choose Your API Provider: Identify a data provider and understand its Base URL, Endpoints, and Authentication.
-b. Understand the API Documentation: Focus on headers, query params, pagination, rate limits, and response structure.
+API Provider Details
 
+API Provider: OpenWeatherMap
+Base URL: `https://api.openweathermap.org/data/2.5/weather`
+Authentication Method: API key authentication, passed as a query parameter (`appid`)
+Endpoint Used: Current weather data endpoint for a single city
 
-2. Secure API Authentication Using Environment Variables
-a. Create a `.env` File Locally: Store API keys and secrets as KEY=VALUE pairs.
-b. Load Environment Variables in Code: Use libraries like `dotenv` to securely load environment variables.
+Setup Instructions
 
+1. Clone the repository and navigate to the project directory.
+2. Create and activate a Python virtual environment:
 
-3. Design the ETL Pipeline
-Extract: Connect to the API, pass tokens/headers, and collect JSON data.
-Transform: Clean or reformat the data for MongoDB compatibility.
-Load: Store the transformed data into a MongoDB collection.
+    On Unix/macOS:
 
+     ```bash
+     python3 -m venv venv
+     source venv/bin/activate
+     ```
+    On Windows:
 
-4. MongoDB Collection Strategy
-Use one collection per connector, e.g., `connector_name_raw`.
-Store ingestion timestamps to support audits or updates.
+     ```bash
+     python -m venv venv
+     venv\Scripts\activate
+     ```
+3. Install required dependencies using the provided requirements file:
 
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Create a `.env` file in the project root directory. The file should contain the following environment variables with appropriate values (do not include quotation marks):
 
-5. Iterative Testing & Validation
-Test for invalid responses, empty payloads, rate limits, and connectivity errors.
-Ensure consistent insertion into MongoDB.
+   ```
+   API_KEY=your_openweathermap_api_key
+   BASE_URL=https://api.openweathermap.org/data/2.5/weather
+   CITY=Chennai
+   MONGO_URI=mongodb://localhost:27017/
+   DB_NAME=weather_data
+   COLLECTION_NAME=weather_reports
+   ```
 
+   It is important to note that the `.env` file contains sensitive information and should not be committed to version control.
 
-6. Git and Project Structure Guidelines
-a. Use a Central Git Repository: Clone the shared repo and create a new branch for your connector.
-b. Ignore Secrets: Add `.env` to `.gitignore` before the first commit.
-c. Push and Document: Write README.md with endpoint details, API usage, and example output.
+## Running the ETL Script
 
+To execute the ETL pipeline, run the following command in your terminal or command prompt from the project directory:
 
-Final Checklist for Students
-Understand API documentation
-Secure credentials in `.env`
-Build complete ETL script
-Validate MongoDB inserts
-Push code to your branch
-Include descriptive README
-Submit Pull Request
+```bash
+python etl_connector.py
+```
 
-## 📋 Assignment Overview
+The script will connect to the OpenWeatherMap API, retrieve the weather data for the specified city, transform the data into a structured format, and insert it into the configured MongoDB collection.
 
-**Goal:**  
-Develop a Python script to connect with an API provider, extract data, transform it for compatibility, and load it into a MongoDB collection. Follow secure coding and project structure practices as outlined below.
+Data Structure in MongoDB
 
----
+Each document inserted into the MongoDB collection contains the following fields:
 
-## ✅ Submission Checklist
+* `city`: Name of the city for which weather data is retrieved
+* `country`: ISO country code of the city
+* `temperature`: Current temperature in degrees Celsius
+* `feels_like`: Perceived temperature in degrees Celsius
+* `humidity`: Humidity percentage
+* `weather`: Textual description of the weather conditions
+* `wind_speed`: Wind speed in meters per second
+* `timestamp`: Unix timestamp indicating the time of the weather data
+* `ingested_at`: Unix timestamp recording when the data was ingested into MongoDB
 
-- [ ] Choose a data provider (API) and understand its documentation
-- [ ] Secure all API credentials using a `.env` file
-- [ ] Build a complete ETL pipeline: Extract → Transform → Load (into MongoDB)
-- [ ] Test and validate your pipeline (handle errors, invalid data, rate limits, etc.)
-- [ ] Follow the provided Git project structure
-- [ ] Write a clear and descriptive `README.md` in your folder with API details and usage instructions
-- [ ] **Include your name and roll number in your commit messages**
-- [ ] Push your code to your branch and submit a Pull Request
+Error Handling and Validation
 
----
+The script implements the following error handling mechanisms:
 
-## 📦 Project Structure
+* Validation of required environment variables before execution begins.
+* Handling of invalid API responses, including non-success HTTP status codes and empty or malformed JSON responses.
+* Retry logic with exponential backoff in the event of HTTP 429 (Too Many Requests) rate limiting errors.
+* Exception handling for network errors during API requests.
+* Exception handling for MongoDB connection and insertion failures, including timeout detection.
+* Informative console output for success and error states to facilitate debugging.
 
-/your-branch-name/
-├── etl_connector.py
-├── .env
-├── requirements.txt
-├── README.md
-└── (any additional scripts or configs)
+Assumptions and Limitations
 
+* The API key provided in the `.env` file is valid and has sufficient permissions to access the OpenWeatherMap API.
+* The MongoDB server specified by `MONGO_URI` is accessible and running at the time of script execution.
+* The script is designed for single-city data retrieval and does not currently support batch or multi-city queries.
+* Scheduling, automation, and user interface components are not included and may be implemented separately as needed.
+* The script is intended primarily for educational and demonstration purposes within the scope of this assignment.
 
-- **`.env`**: Store sensitive credentials; do **not** commit this file.
-- **`etl_connector.py`**: Your main ETL script.
-- **`requirements.txt`**: List all Python dependencies.
-- **`README.md`**: Instructions for your connector.
+Author Information
 
----
-
-## 🛡️ Secure Authentication
-
-- Store all API keys/secrets in a local `.env` file.
-- Load credentials using the `dotenv` Python library.
-- Add `.env` to `.gitignore` before committing.
-
----
-
-## 🗃️ MongoDB Guidelines
-
-- Use one MongoDB collection per connector (e.g., `connectorname_raw`).
-- Store ingestion timestamps for audit and update purposes.
+* Name: K.Keerthana
+* Roll Number: 3122225001060
 
 ---
-
-## 🧪 Testing & Validation
-
-- Check for invalid responses, empty payloads, rate limits, and connectivity issues.
-- Ensure data is correctly inserted into MongoDB.
-
----
-
-## 📝 Git & Submission Guidelines
-
-1. **Clone the repository** and create your own branch.
-2. **Add your code and documentation** in your folder/branch.
-3. **Do not commit** your `.env` or secrets.
-4. **Write clear commit messages** (include your name and roll number).
-5. **Submit a Pull Request** when done.
-
----
-
-## 💡 Additional Resources
-
-- [python-dotenv Documentation](https://saurabh-kumar.com/python-dotenv/)
-- [MongoDB Python Driver (PyMongo)](https://pymongo.readthedocs.io/en/stable/)
-- [API Documentation Example](https://restfulapi.net/)
-
----
-
-## 📢 Need Help?
-
-- Post your queries in the [KYUREEUS/SSN College - WhatsApp group](#) .
-- Discuss issues, share progress, and help each other.
-
----
-
-Happy coding! 🚀
