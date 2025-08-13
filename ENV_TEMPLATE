@@ -1,0 +1,7 @@
+OTX_API_KEY=API_KEY
+BASE_URL=https://otx.alienvault.com/api/v1
+MONGO_URI=mongodb://localhost:27017/
+DB_NAME=api_testing
+COLLECTION_NAME=otx_pulses_raw
+CONNECTOR_NAME=otx_pulses_connector
+CITY=Chennai
