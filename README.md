@@ -1,97 +1,48 @@
-Weather Data ETL Connector
+# OTX Pulses ETL Connector
 
-Project Overview
+**Connector:** otx_pulses_connector  
+**Target:** AlienVault OTX (/api/v1/pulses/subscribed) → MongoDB
 
-This project implements a Python-based ETL (Extract, Transform, Load) connector that retrieves current weather data for a specified city from the OpenWeatherMap API. The connector extracts JSON data from the API, transforms it into a structured format compatible with MongoDB, and loads it into a MongoDB collection for storage and further analysis.
+## What this script does
+1. Reads OTX API key and DB settings from local `.env`.
+2. Extracts subscribed pulses from OTX using the `X-OTX-API-KEY` header.
+3. Transforms each pulse into a Mongo-friendly document and adds `ingestion_timestamp`.
+4. Loads/upserts documents into `DB_NAME.COLLECTION_NAME`.
 
-API Provider Details
+## Setup
+1. Copy `.env.sample` → `.env` and fill values (do NOT commit `.env`).
+2. Add `.env` to `.gitignore`.
+3. Install deps:
+pip install -r requirements.txt
 
-API Provider: OpenWeatherMap
-Base URL: `https://api.openweathermap.org/data/2.5/weather`
-Authentication Method: API key authentication, passed as a query parameter (`appid`)
-Endpoint Used: Current weather data endpoint for a single city
-
-Setup Instructions
-
-1. Clone the repository and navigate to the project directory.
-2. Create and activate a Python virtual environment:
-
-    On Unix/macOS:
-
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
-    On Windows:
-
-     ```bash
-     python -m venv venv
-     venv\Scripts\activate
-     ```
-3. Install required dependencies using the provided requirements file:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Create a `.env` file in the project root directory. The file should contain the following environment variables with appropriate values (do not include quotation marks):
-
-   ```
-   API_KEY=your_openweathermap_api_key
-   BASE_URL=https://api.openweathermap.org/data/2.5/weather
-   CITY=Chennai
-   MONGO_URI=mongodb://localhost:27017/
-   DB_NAME=weather_data
-   COLLECTION_NAME=weather_reports
-   ```
-
-   It is important to note that the `.env` file contains sensitive information and should not be committed to version control.
-
-## Running the ETL Script
-
-To execute the ETL pipeline, run the following command in your terminal or command prompt from the project directory:
-
-```bash
+markdown
+Copy
+Edit
+4. Run:
 python etl_connector.py
-```
 
-The script will connect to the OpenWeatherMap API, retrieve the weather data for the specified city, transform the data into a structured format, and insert it into the configured MongoDB collection.
+pgsql
+Copy
+Edit
 
-Data Structure in MongoDB
+## Notes & validation
+- The OTX API expects `X-OTX-API-KEY` header for authentication. See OTX docs. :contentReference[oaicite:3]{index=3}
+- Primary endpoint used: `GET /api/v1/pulses/subscribed`. You must have subscribed to at least one pulse for results. :contentReference[oaicite:4]{index=4}
+- The connector respects basic rate-limits (handles 429 using `Retry-After` when present).
+- Single Mongo collection per connector is used (`COLLECTION_NAME` env var). Each doc contains `ingestion_timestamp` for audits.
 
-Each document inserted into the MongoDB collection contains the following fields:
+## Git & submission checklist
+- Create a branch: `git checkout -b your-branch-name`
+- Add files (do NOT add `.env`):
+git add etl_connector.py requirements.txt README.md .env.sample
+git commit -m "YourName RollNumber: add OTX pulses connector"
+git push origin your-branch-name
 
-* `city`: Name of the city for which weather data is retrieved
-* `country`: ISO country code of the city
-* `temperature`: Current temperature in degrees Celsius
-* `feels_like`: Perceived temperature in degrees Celsius
-* `humidity`: Humidity percentage
-* `weather`: Textual description of the weather conditions
-* `wind_speed`: Wind speed in meters per second
-* `timestamp`: Unix timestamp indicating the time of the weather data
-* `ingested_at`: Unix timestamp recording when the data was ingested into MongoDB
+pgsql
+Copy
+Edit
+- Open PR and include your name & roll number in description and commit messages.
 
-Error Handling and Validation
-
-The script implements the following error handling mechanisms:
-
-* Validation of required environment variables before execution begins.
-* Handling of invalid API responses, including non-success HTTP status codes and empty or malformed JSON responses.
-* Retry logic with exponential backoff in the event of HTTP 429 (Too Many Requests) rate limiting errors.
-* Exception handling for network errors during API requests.
-* Exception handling for MongoDB connection and insertion failures, including timeout detection.
-* Informative console output for success and error states to facilitate debugging.
-
-Assumptions and Limitations
-
-* The API key provided in the `.env` file is valid and has sufficient permissions to access the OpenWeatherMap API.
-* The MongoDB server specified by `MONGO_URI` is accessible and running at the time of script execution.
-* The script is designed for single-city data retrieval and does not currently support batch or multi-city queries.
-* Scheduling, automation, and user interface components are not included and may be implemented separately as needed.
-* The script is intended primarily for educational and demonstration purposes within the scope of this assignment.
-
-Author Information
-
-* Name: K.Keerthana
-* Roll Number: 3122225001060
-
----
+## Resources
+- OTX API main site & docs (endpoints & examples). :contentReference[oaicite:5]{index=5}
+- OTX Python SDK (optional): https://github.com/AlienVault-OTX/OTX-Python-SDK. :contentReference[oaicite:6]{i
