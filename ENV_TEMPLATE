@@ -1,4 +1,4 @@
-OTX_API_KEY=API_KEY
+API_KEY=API_KEY
 BASE_URL=https://otx.alienvault.com/api/v1
 MONGO_URI=mongodb://localhost:27017/
 DB_NAME=your_DB_Name
